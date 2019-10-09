@@ -346,7 +346,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<flow-ref doc:name="Flow Reference" doc:id="37c43038-0394-4bd2-af50-eaba3146e018" name="getRecords" targetValue="#[payload[0][0] as String]"/>
+		<flow-ref doc:name="Flow Reference" doc:id="37c43038-0394-4bd2-af50-eaba3146e018" name="inlineCount" targetValue="#[payload[0][0] as String]"/>
 	</flow>
 	<flow name="getIndividualRecord" doc:id="c790b10a-ecfa-4251-962c-6614d639c2ac" >
 		<ee:transform doc:name="Transform Message" doc:id="33553819-4063-41c2-93e3-97046e20cfd0" >
