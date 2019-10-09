@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="QUERY" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="TaskJson" format="json">
+      <types:shape format="weave" example="examples/task.json"><![CDATA[%dw 2.0
+
+type TaskJson = Array<{|  whoId: String,   tstatus: String,   ttype: String,   whatId: String,   tsubject: Null,   sfId: String,   tdescription: String,   taskId: String,   ServiceRequest: String,   caseId: String,   contactId: String|}> {"example": "[{\"whoId\":\"0034T000002SLxlQAG\",\"tstatus\":\"Open\",\"ttype\":\"task\",\"whatId\":\"5004T000001YCuyQAG\",\"tsubject\":null,\"sfId\":\"00T4T000002WVDtUAO\",\"tdescription\":\"Testing something relatively meaningless like testing OData.\",\"taskId\":\"5673AFF2-15FB-4D4A-917A-019BE58B36F2\",\"ServiceRequest\":\"123\",\"caseId\":\"5004T000001XbKRQA0\",\"contactId\":\"0034T000002RXtbQAG\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a0f32bf3-2ae5-40bd-8611-eeea398b9993">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="QUERY"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#7b2c0f58-da11-4620-b537-e5c281f0c0d1">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="TaskJson"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
