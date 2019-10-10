@@ -134,7 +134,7 @@ output application/json
         </ee:transform>
         <set-variable value="#[attributes.uriParams.ExternalId]" doc:name="Set Variable" doc:id="8c50dd2d-0638-4bb3-8b70-06fc5c9c9a0a" variableName="id" />
         <logger level="INFO" message="put:\cases\(ExternalId):application\json:api-config" />
-        <flow-ref doc:name="Flow Reference" doc:id="374828bb-97bf-443d-9604-7a6d0d4133a5" name="getIndividualRecord" targetValue="#[payload]" />
+        <flow-ref doc:name="Flow Reference" doc:id="374828bb-97bf-443d-9604-7a6d0d4133a5" name="UpdateRecord" targetValue="#[payload]" />
     </flow>
     <flow name="post:\tasks\(taskId):application\json:api-config">
         <ee:transform>
@@ -144,6 +144,7 @@ output application/json
         </ee:transform>
         <set-variable value="#[attributes.uriParams.taskId]" doc:name="Set Variable" doc:id="3bd6d47a-d783-4d84-b77b-8bd0f122666e" variableName="id" />
         <logger level="INFO" message="put:\tasks\(taskId):application\json:api-config" />
+        <flow-ref doc:name="Flow Reference" doc:id="4e00185f-4a0c-43bb-971b-a0ac8c8508bb" name="UpdateRecord" targetValue="#[payload]" />
     </flow>
     <flow name="delete:\cases\(ExternalId):api-config">
         <ee:transform doc:id="993ab0d9-aec4-4aee-97a7-54de9b85abc8">
