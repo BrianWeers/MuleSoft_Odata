@@ -5,7 +5,7 @@
     </http:listener-config>
     <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <db:config name="Database_Config" doc:name="Database Config" doc:id="68c12cfa-55fe-47b4-9d06-cc36788693b8">
-        <db:mssql-connection host="trubooksales.database.windows.net" user="{AddUser}" password="{AddPasword}" databaseName="{AddDatabase}" />
+        <db:mssql-connection host="{--add server--}" user="{AddUser}" password="{AddPasword}" databaseName="{AddDatabase}" />
     </db:config>
 	<flow name="inlineCount" doc:id="143e6404-78af-4e71-88ed-44cd963fb89d" >
 		<choice doc:name="Choice" doc:id="3b2db1da-b9e9-4654-aebd-393bb360a2ea" >
