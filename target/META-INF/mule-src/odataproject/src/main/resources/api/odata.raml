@@ -6,10 +6,16 @@ types:
   cases:
     (odata.remote): odt.ExternalCase
     properties:
+      ExternalId:
+        type: string
+        (odata.key) : true
+        (odata.nullable) : true
+        maxLength : 36
+        required: false
       caseId:
         type: string
-        (odata.key): true
-        (odata.nullable): false
+        (odata.key): false
+        (odata.nullable): true
         maxLength: 18 
         required: false
       csubject:

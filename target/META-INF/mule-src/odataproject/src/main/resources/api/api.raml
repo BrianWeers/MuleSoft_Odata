@@ -43,7 +43,7 @@ resourceTypes:
           body:
             application/json:
               type: <<model>>
-    put:
+    post:
       description: Update <<model>>
       body:
         application/json:
@@ -53,11 +53,15 @@ resourceTypes:
           body:
             application/json:
               type: <<model>>
+        201:
+          body:
+            application/json:
+              type: <<model>>      
               
 /cases:
   displayName: cases
   type: { collection: { model: model.cases } }
-  /{caseId}:
+  /{ExternalId}:
     displayName: cases
     type: { member: { model: model.cases } }
 /tasks:
