@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="68c12cfa-55fe-47b4-9d06-cc36788693b8">
+        <db:mssql-connection host="trubooksales.database.windows.net" user="trusalesadmin" password="Mandie78!" databaseName="ODataDemo" />
+    </db:config>
+	<flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+		<apikit:router config-ref="api-config"/>
+		<error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="api-console">
+        <http:listener config-ref="api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+	<flow name="inlineCount" doc:id="143e6404-78af-4e71-88ed-44cd963fb89d" >
+		<choice doc:name="Choice" doc:id="3b2db1da-b9e9-4654-aebd-393bb360a2ea" >
+			<when expression='#[attributes.queryParams.inlinecount == "allpages"]'>
+				<ee:transform doc:name="Transform Message" doc:id="c6889744-5dc3-4deb-834a-35bc73dba9c1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+// This DataWeave generates a tSQL Select Query from your metadata
+
+// APIkit odata Service creates a variable that contains the table's name
+	var remoteEntityName = vars.odata.remoteEntityName match {
+		case remoteEntityName is String -> remoteEntityName
+		else -> ""
+	}
+	
+---
+	
+"SELECT count(*) FROM $remoteEntityName"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<db:select doc:name="Select" doc:id="c2c3fdee-d64b-4cc1-9623-857935079f4d" config-ref="Database_Config">
+					<db:sql >#[payload]</db:sql>
+				</db:select>
+			</when>
+		</choice>
+	</flow>
+	<flow name="getRecords" doc:id="5998d198-3d36-4459-b158-2ce8e1ae51db" >
+		<ee:transform doc:name="Transform Message" doc:id="37f3f2b1-dab7-4f75-99a1-6f1cd37ef8fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/java
+
+// This DataWeave generates a MySQL Select Query from your metadata
+
+
+// APIkit Odata Service creates a variable that contains the fields of your entity. It's a list of string (List<String>)
+
+var entityFields : Array<String> = vars.odata.fields match {
+
+    case entityFields is Array<String> -> entityFields
+
+    else -> []
+
+}
+
+
+
+// APIkit Odata Service creates a variable that contains the keys of your entity
+
+var keys : String = vars.odata.keyNames match {
+
+    case keyNames is String -> keyNames
+
+    else -> ""
+
+}
+
+
+
+// APIkit Odata Service creates a variable that contains the table's name
+
+var remoteEntityName = vars.odata.remoteEntityName match {
+
+    case remoteEntityName is String -> remoteEntityName
+
+    else -> ""  
+
+}
+
+
+
+// Generate the fields you need in the query.
+
+// It checks for a select function in case you need less filters that you're actually exposing.
+
+// If there is no select present, it just returns your fields defined in your metadata
+
+var generateSqlFields = (select) -> ((if (select != "" )( (select splitBy ",") -- (keys splitBy ",") ++ (keys splitBy ",")) else entityFields) map "$" ) joinBy ", "
+
+
+// Transform oDataFilters into MySQL Filters
+
+var odataFilterToSQLFilter = (odataFilter) ->
+
+     
+
+     odataFilter replace "eq null" with "is null"
+
+     replace "ne null" with "is not null"
+
+     replace " eq " with " = "
+
+     replace " ne " with " != "
+
+     replace " gt " with " > "
+
+     replace " lt " with " < "
+
+     replace " ge " with " >= "
+
+     replace " le " with " <= "
+
+     replace " and " with " AND "
+
+     replace " or " with " OR "
+
+
+
+
+
+
+
+// APIkit Odata Service puts your oData filters into the queryParams
+
+var filters = attributes.queryParams
+
+
+
+var top : String = 
+filters.top match {
+
+case top is String -> top
+
+else -> ""
+
+} 
+
+
+
+var skip : String = filters.skip match {
+
+case skip is String -> skip
+
+else -> ""
+
+} 
+
+
+
+var select : String = filters.select match {
+
+    case select is String -> select
+
+    else -> ""
+
+}
+
+
+
+var filter : String = filters.filter match {
+
+    case filter is String -> filter
+
+    else -> ""
+
+}
+
+
+
+var orderby : String = filters.orderby match {
+
+    case orderby is String -> orderby
+
+    else -> ""
+
+}
+
+
+
+// This function transforms your orderby oData filters into MySQL Order by format.
+
+// Transforms something like orderby=myField, ASC into ORDER BY myField, ASC
+
+// If no orderby is present, it just returns an empty string
+
+var toSQLOrderBy = (orderby,skip ) -> if(orderby != "" and skip != "" ) (" ORDER BY " ++ (orderby replace "=" with " ") ++ " OFFSET $skip ROWS") else ""
+
+
+
+// This function transforms your skip and top oData filters into MySQL LIMIT format.
+
+var toSQLTop = (top) -> if (top != "") " TOP( $top ) " else ""
+
+
+
+// Generate the where part of your query.
+
+var toSQLWhere = (odataFilter) -> if(odataFilter != "") " WHERE " ++ odataFilterToSQLFilter(odataFilter) else ""
+
+
+
+---
+
+
+
+"SELECT " ++ (toSQLTop(top)) ++ generateSqlFields(select) ++ " FROM $remoteEntityName"
+
+++ ( 
+
+   (toSQLWhere(filter)) ++
+
+   (toSQLOrderBy(orderby,skip))
+
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="4374a8d3-bd52-452d-b0bf-56ca028935f5" config-ref="Database_Config">
+			<db:sql >#[payload]</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="560aae5b-e4bc-45ab-85e7-6c7e13b6e7a1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	entries : payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="37c43038-0394-4bd2-af50-eaba3146e018" name="inlineCount" targetValue="#[payload[0][0] as String]"/>
+	</flow>
+	<flow name="getIndividualRecord" doc:id="c790b10a-ecfa-4251-962c-6614d639c2ac" >
+		<ee:transform doc:name="Transform Message" doc:id="33553819-4063-41c2-93e3-97046e20cfd0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+
+// APIkit Odata Service cretes a variable that contains the fields of your entity.  It's a list of string (List<String>)
+var entityFields : Array<String> = vars.odata.fields match {
+	case entityFields is Array<String> -> entityFields
+	else -> []
+}
+
+var keys : String = vars.odata.keyNames match {
+	case keyNames is String -> keyNames
+	else -> ""
+}
+
+//APIkit Odata service creates a variable that contains the table's name
+var remoteEntityName = vars.odata.remoteEntityName match {
+	case remoteEntityName is String -> remoteEntityName
+	else -> ""
+}
+var filters = attributes.queryParams
+
+var select : String = filters.select match {
+	case select is String -> select
+	else -> ""
+}
+
+var id = vars.id match {
+	case id is String -> id
+	else -> ""
+	}
+
+var generateSqlFields = (select) -> ((if (select != "") ( ( select splitBy ",") -- (keys splitBy ",") ++ (keys splitBy ",")) else entityFields) map "$") joinBy ", "
+---
+
+"SELECT " ++ generateSqlFields(select) ++ " FROM $remoteEntityName WHERE $keys = '$id'"
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="69554762-2a4a-41a9-a428-f116f520af9a" config-ref="Database_Config">
+			<db:sql >#[payload]</db:sql>
+		</db:select>
+		<choice doc:name="Choice" doc:id="cfaac52c-58da-4f1d-9017-bc32ea44ee58" >
+			<when expression="#[sizeOf(payload) == 0]">
+				<set-variable value="404" doc:name="Set Variable" doc:id="5ffc7837-fc9f-49c7-a893-534747ea3cc7" variableName="httpStatus"/>
+				<set-payload value='{ message : "Resource Not Found" }' doc:name="Set Payload" doc:id="5f30c6b0-542c-4715-8e62-8f53e9ab83e9" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="908b2d1d-c21f-48b0-a762-7aba1f2d8731" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	entries : payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getInsertedRecord" doc:id="dc0e8d7e-5a15-465a-a9d9-8bc8542037e2" >
+		<ee:transform doc:name="Transform Message" doc:id="e4839296-60b9-4821-af6c-2821efedb421" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+
+var entityFields : Array<String> = vars.odata.fields match {
+	case entityFields is Array<String> -> entityFields
+	else -> ""
+}
+
+var remoteEntityName = vars.odata.remoteEntityName match {
+	case remoteEntityName is String -> remoteEntityName
+	else -> ""
+}
+
+var id = vars.id match {
+	case id is String -> id
+	else -> ""
+	}
+var idField = vars.idField match {
+	case idField is String -> idField
+	else -> ""
+	}
+---
+
+"SELECT " ++ (entityFields joinBy ", ") ++ " FROM $remoteEntityName WHERE $idField = '$id'"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:select doc:name="Select" doc:id="c3d9a082-fe41-408a-9145-eccf5343e528" config-ref="Database_Config" >
+			<db:sql >#[payload]</db:sql>
+		</db:select>
+		<set-variable value="201" doc:name="Set Variable" doc:id="fd47101f-1f61-4e89-9f80-3dce4b6dc9ca" variableName="httpStatus"/>
+		<ee:transform doc:name="Transform Message" doc:id="4ab13fea-6f08-4848-b306-07edecf051b6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	entries : payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+		<flow name="InsertRecord" doc:id="df3da142-39ea-48c6-88c5-87918d781f48" >
+		<ee:transform doc:name="Transform Message" doc:id="7ca63302-d5c4-4ccc-9592-f36587207e0b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+// This DataWeave generates a MySQL Update Query from your metadata for a particular entity
+
+// APIkit Odata Service creates a variable that contains the table's name 
+var remoteEntityName = vars.odata.remoteEntityName match {
+case remoteEntityName is String -> remoteEntityName
+else -> ""
+}
+
+var valuesFromPayload = {
+	keys: payload pluck $$,
+	values: payload pluck "'$'"
+}
+
+var columns = ( (valuesFromPayload.keys map "$" ) joinBy ", ") //'myKey1', 'myKey2''
+var values = ( valuesFromPayload.values joinBy ", ") // 'myValue1','myValue2'
+
+
+---
+//INSERT INTO odt.ExternalCase ('myKey1','myKey2') VALUES ('myvalue1','myvalue2')
+"INSERT INTO $remoteEntityName ($columns) VALUES ($values)"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="444709f7-a66c-4939-b60d-f31e48767341" config-ref="Database_Config">
+			<db:sql >#[payload]</db:sql>
+		</db:insert>
+		<flow-ref doc:name="Flow Reference" doc:id="b860eadc-03c9-43da-b489-9d56c3cf8db5" name="getInsertedRecord" targetValue="#[payload]"/>
+	</flow>
+	<flow name="UpdateRecord" doc:id="ff7017df-3c64-4b8e-baab-e6e96ec641b1" >
+		<ee:transform doc:name="Transform Message" doc:id="022a4f65-5672-44b1-ae4b-f67ce35891a5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+// This DataWeave generates a MySQL Update Query from your metadata for a particular entity
+
+// APIkit Odata Service creates a variable that contains the table's name 
+var remoteEntityName = vars.odata.remoteEntityName match {
+case remoteEntityName is String -> remoteEntityName
+else -> ""
+}
+
+var keys = vars.odata.keyNames match{
+	case keys is String -> keys
+	else -> ""
+}
+
+
+var id = vars.id match {
+	case id is String -> id
+	else -> ""
+	}
+
+
+// Transform your payload (myKey1: myValue1, myKey2: myValue2) into something like myKey1 = 'myValue1', myKey2 = 'myValue2'
+var sqlValues = (payload mapObject ((value, key) -> '$key': "$key = '$value'")) pluck ((value, key, index) -> value ) joinBy  ","
+---
+"UPDATE $remoteEntityName SET $sqlValues WHERE $keys = '$id'"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:update doc:name="Update" doc:id="a11f6da5-f8f9-4f80-94a1-3e532a7d3b54" config-ref="Database_Config" >
+			<db:sql >#[payload]</db:sql>
+		</db:update>
+		<choice doc:name="Choice" doc:id="4de9d24d-d712-4684-81a9-fc196f0ae5f3">
+			<when expression="#[sizeOf(payload) == 0]">
+				<set-variable value="404" doc:name="Set Variable" doc:id="58cf48ba-d736-4794-9147-d530eae5c2ad" variableName="httpStatus" />
+				<set-payload value='{ message : "Resource Not Found"}' doc:name="Set Payload" doc:id="d41bca7c-affb-44c2-99f5-ad3852c0d769" />
+			</when>
+			<otherwise>
+				<set-variable doc:name="Set Variable" doc:id="78e74a98-4406-4669-a103-f4cf72cc14fe" variableName="httpStatus" value="204" />
+				<set-payload value="#[null]" doc:name="Set Payload" doc:id="18c9540b-021e-4ab5-95a6-13925d1b3561" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="DeleteRecord" doc:id="2af6fb3d-5030-40bb-ac1d-34365f71de12" >
+		<ee:transform doc:name="Transform Message" doc:id="77fa08c0-9f78-4c05-80e5-93acf866bcd1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+
+// APIkit Odata Service cretes a variable that contains the fields of your entity.  It's a list of string (List<String>)
+var entityFields : Array<String> = vars.odata.fields match {
+	case entityFields is Array<String> -> entityFields
+	else -> []
+}
+
+var keys : String = vars.odata.keyNames match {
+	case keyNames is String -> keyNames
+	else -> ""
+}
+
+//APIkit Odata service creates a variable that contains the table's name
+var remoteEntityName = vars.odata.remoteEntityName match {
+	case remoteEntityName is String -> remoteEntityName
+	else -> ""
+}
+var filters = attributes.queryParams
+
+var select : String = filters.select match {
+	case select is String -> select
+	else -> ""
+}
+
+var id = vars.id match {
+	case id is String -> id
+	else -> ""
+	}
+
+var generateSqlFields = (select) -> ((if (select != "") ( ( select splitBy ",") -- (keys splitBy ",") ++ (keys splitBy ",")) else entityFields) map "$") joinBy ", "
+---
+
+"DELETE " ++ " FROM $remoteEntityName WHERE $keys = '$id'"
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:delete doc:name="Delete" doc:id="51a1b483-386b-407e-8d2f-b4278b5cbcad" config-ref="Database_Config">
+			<db:sql >#[payload]</db:sql>
+		</db:delete>
+		<choice doc:name="Choice" doc:id="cb1bc4e8-cd17-42b8-8c90-b8bc9d0ec1b9" >
+			<when expression="#[payload == 0]">
+				<set-payload value='{ message : "Resource Not Found" }' doc:name="Set Payload" doc:id="e283855a-4fb3-4753-9c6d-49d288ff7af4" />
+				<set-variable value="404" doc:name="Set Variable" doc:id="50d8fc89-1320-4083-9429-e1b21e028c45" variableName="httpStatus"/>
+			</when>
+			<otherwise>
+				<set-payload value="#[null]" doc:name="Set Payload" doc:id="8939c26e-4948-4913-a4bd-03fd02e322f7" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
