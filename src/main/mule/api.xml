@@ -5,7 +5,7 @@
     </http:listener-config>
     <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <db:config name="Database_Config" doc:name="Database Config" doc:id="68c12cfa-55fe-47b4-9d06-cc36788693b8">
-        <db:mssql-connection host="trubooksales.database.windows.net" user="trusalesadmin" password="Mandie78!" databaseName="ODataDemo" />
+        <db:mssql-connection host="trubooksales.database.windows.net" user="{---}" password="{---}" databaseName="{---}" />
     </db:config>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*">
